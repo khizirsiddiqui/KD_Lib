@@ -3,16 +3,16 @@ import torch.nn as nn
 import torch.optim as optim
 from torchvision import datasets, transforms
 
-from train import train_teacher, train_student
-from evaluate import eval
-from model import teacher, student
+from .train import train_teacher, train_student
+from .evaluate import eval
+from .model import teacher, student
 
 import argparse
 
 
 def mnist(teacher_size=1200, student_size=800,epochs=20, lr=0.01, optimizer='SGD',
           loss='MSE', batch_size=100, distil_weight=0.7, temp=20 ):
-    
+
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     train_loader = torch.utils.data.DataLoader(
@@ -28,7 +28,7 @@ def mnist(teacher_size=1200, student_size=800,epochs=20, lr=0.01, optimizer='SGD
                             transforms.ToTensor(),
                             transforms.Normalize((0.1307,), (0.3081,))
                         ])),
-        batch_size=batch_size, shuffle=True)  
+        batch_size=batch_size, shuffle=True)
 
     teacher_model = teacher(teacher_size).to(device)
     student_model = student(student_size).to(device)
@@ -39,7 +39,7 @@ def mnist(teacher_size=1200, student_size=800,epochs=20, lr=0.01, optimizer='SGD
     elif optimizer.upper() == 'Adam':
         t_optimizer = optim.Adam(teacher_model.parameters(), lr)
         s_optimizer = optim.Adam(student_model.parameters(), lr)
-    
+
     if loss.upper() == 'MSE':
         loss_fn = nn.MSELoss()
     elif loss.upper() == 'KL':
@@ -47,7 +47,7 @@ def mnist(teacher_size=1200, student_size=800,epochs=20, lr=0.01, optimizer='SGD
 
     train_teacher(teacher_model, train_loader, t_optimizer, epochs, device)
     eval(teacher_model, test_loader)
-    train_student(teacher_model, student_model, train_loader, s_optimizer, 
+    train_student(teacher_model, student_model, train_loader, s_optimizer,
                   loss_fn, epochs, temp, distil_weight)
     eval(student_model, test_loader)
 

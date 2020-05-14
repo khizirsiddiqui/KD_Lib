@@ -5,7 +5,6 @@ import pytest
 import random
 
 from KD_Lib.TAKD.main import main_TAKD
-from KD_Lib import KD_Lib
 from KD_Lib.original.mnist import mnist
 
 
